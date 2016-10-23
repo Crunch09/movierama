@@ -11,7 +11,8 @@ RSpec.describe 'vote on movies', type: :feature do
   before do
     author = User.create(
       uid:  'null|12345',
-      name: 'Bob'
+      name: 'Bob',
+      email: 'bob@example.com'
     )
     Movie.create(
       title:        'Empire strikes back',
@@ -19,6 +20,17 @@ RSpec.describe 'vote on movies', type: :feature do
       date:         '1980-05-21',
       user:         author
     )
+    author_without_email = User.create(
+      uid:  'null|99999',
+      name: 'Jack'
+    )
+    Movie.create(
+      title:        'The Force Awakens',
+      description:  'Chewie, we\'re home!',
+      date:         '2015-12-18',
+      user:         author_without_email
+    )
+    Sidekiq::Worker.clear_all
   end
 
   context 'when logged out' do
@@ -73,9 +85,24 @@ RSpec.describe 'vote on movies', type: :feature do
         page.like('The Party')
       }.to raise_error(Capybara::ElementNotFound)
     end
+
+    context 'author of the movie submission has an email address' do
+      it 'sends an email if a movie is liked' do
+        expect { page.like('Empire strikes back') }.to(
+          change(Sidekiq::Extensions::DelayedMailer.jobs, :size).from(0).to(1)
+        )
+        expect { Sidekiq::Extensions::DelayedMailer.drain }.to_not raise_error
+      end
+    end
+
+    context 'author of the movie submission doesn\'t have an email address' do
+
+      it 'doesn\'t send an email if a movie is liked' do
+        expect { page.like('The Force Awakens') }.to_not(
+          change(Sidekiq::Extensions::DelayedMailer.jobs, :size)
+        )
+      end
+    end
   end
 
 end
-
-
-
