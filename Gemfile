@@ -58,6 +58,9 @@ gem 'pry'
 gem 'pry-nav'
 gem 'pry-doc'
 
+# Background jobs
+gem 'sidekiq', '3.4.1'
+
 
 group :test do
   gem 'guard-rspec'    # Continuous testing
