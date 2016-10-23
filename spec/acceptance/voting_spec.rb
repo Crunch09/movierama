@@ -93,6 +93,13 @@ RSpec.describe 'vote on movies', type: :feature do
         )
         expect { Sidekiq::Extensions::DelayedMailer.drain }.to_not raise_error
       end
+
+      it 'sends an email if a movie is hated' do
+        expect { page.hate('Empire strikes back') }.to(
+          change(Sidekiq::Extensions::DelayedMailer.jobs, :size).from(0).to(1)
+        )
+        expect { Sidekiq::Extensions::DelayedMailer.drain }.to_not raise_error
+      end
     end
 
     context 'author of the movie submission doesn\'t have an email address' do
