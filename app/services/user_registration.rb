@@ -28,6 +28,7 @@ class UserRegistration
     ]
 
     if user = User.find(uid: uid).first
+      user.update(email: @auth_hash['info']['email']) unless user.email.present?
       @user    = user
       @created = false
     else

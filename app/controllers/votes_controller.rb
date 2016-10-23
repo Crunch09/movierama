@@ -33,7 +33,7 @@ class VotesController < ApplicationController
   end
 
   def _send_notification_email
-    if _movie.user.email
+    if _movie.user.email.present?
       VoteMailer.delay.notification_email(_movie.id, current_user.id, _type)
     end
   end
