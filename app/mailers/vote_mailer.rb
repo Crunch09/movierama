@@ -2,8 +2,9 @@ class VoteMailer < ActionMailer::Base
   default from: "info@movierama.dev"
 
   def notification_email(movie_id, liked_by_user_id, type)
-    @movie = Movie[movie_id]
-    @user =  User[liked_by_user_id]
+    @movie  = Movie[movie_id]
+    @user   = User[liked_by_user_id]
+    @author = @movie.user
     mail(to: @movie.user.email, subject: _subject_for(type),
          template_name: "#{type}_notification")
   end
