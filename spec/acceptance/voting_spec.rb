@@ -87,18 +87,16 @@ RSpec.describe 'vote on movies', type: :feature do
     end
 
     context 'author of the movie submission has an email address' do
-      it 'sends an email if a movie is liked' do
-        expect { page.like('Empire strikes back') }.to(
-          change(Sidekiq::Extensions::DelayedMailer.jobs, :size).from(0).to(1)
+      it 'doesn\'n send an email directly if a movie is liked' do
+        expect { page.like('Empire strikes back') }.to_not(
+          change{Sidekiq::Extensions::DelayedMailer.jobs.size }
         )
-        expect { Sidekiq::Extensions::DelayedMailer.drain }.to_not raise_error
       end
 
       it 'sends an email if a movie is hated' do
-        expect { page.hate('Empire strikes back') }.to(
-          change(Sidekiq::Extensions::DelayedMailer.jobs, :size).from(0).to(1)
+        expect { page.hate('Empire strikes back') }.to_not(
+          change{Sidekiq::Extensions::DelayedMailer.jobs.size }
         )
-        expect { Sidekiq::Extensions::DelayedMailer.drain }.to_not raise_error
       end
     end
 
