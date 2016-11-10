@@ -93,10 +93,24 @@ RSpec.describe 'vote on movies', type: :feature do
         )
       end
 
-      it 'sends an email if a movie is hated' do
-        expect { page.hate('Empire strikes back') }.to_not(
-          change{Sidekiq::Extensions::DelayedMailer.jobs.size }
+      it 'add a vote count if a movie is liked' do
+        expect { page.like('Empire strikes back') }.to(
+          change{VoteCounter.all.size}.by(1)
         )
+        vote_count = VoteCounter.all.first
+        expect(vote_count.type).to eq "like"
+        expect(vote_count.movie.title).to eq 'Empire strikes back'
+        expect(vote_count.user.uid).to eq "github|12345"
+      end
+
+      it 'add a vote count if a movie is hated' do
+        expect { page.hate('Empire strikes back') }.to(
+          change{VoteCounter.all.size}.by(1)
+        )
+        vote_count = VoteCounter.all.first
+        expect(vote_count.type).to eq "hate"
+        expect(vote_count.movie.title).to eq 'Empire strikes back'
+        expect(vote_count.user.uid).to eq "github|12345"
       end
     end
 
